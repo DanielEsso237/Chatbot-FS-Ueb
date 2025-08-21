@@ -1,8 +1,8 @@
 import streamlit as st
 from views.login import login_page
-#from views.chatbot import VectorialSearchGemma
-#from views.stylised_chatbot import VectorialSearchGemma
-from views.chatbotlangchain import VectorialSearchGemmaLangChain
+from views.chatbot import VectorialSearchGemma
+
+
 def main():
     if "page" not in st.session_state:
         st.session_state.page = "login"
@@ -10,7 +10,7 @@ def main():
     if st.session_state.page == "login":
         login_page()
     elif st.session_state.page == "app":
-        app = VectorialSearchGemmaLangChain(pdf_folder="pdfs")
+        app = VectorialSearchGemma(pdf_folder="pdfs")
         app.prepare_data()
         app.load_index()
         app.render()
