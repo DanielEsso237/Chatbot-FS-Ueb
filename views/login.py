@@ -57,7 +57,10 @@ def login_page():
     """, unsafe_allow_html=True)
 
     
-    st.markdown('<div class="form-container">', unsafe_allow_html=True)
+    st.markdown("""
+<div class="form-container">
+    <div class="connexion-text">CONNEXION</div>
+""", unsafe_allow_html=True)
     with st.form("login_form", clear_on_submit=False):
         st.markdown('<div class="input-group">', unsafe_allow_html=True)
         username = st.text_input(

@@ -295,6 +295,34 @@ header {visibility: hidden;}
     pointer-events: none;
 }
 
+/*test*/
+.connexion-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Modifié: enlève la rotation */
+    z-index: 1;
+    font-size: 3rem;
+    font-weight: 800;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--text-primary);
+    background: linear-gradient(135deg, var(--secondary-blue), var(--accent-gold)); /* Ajouté: dégradé de couleur */
+    background-clip: text; /* Ajouté */
+    -webkit-background-clip: text; /* Ajouté */
+    -webkit-text-fill-color: transparent; /* Modifié: remplace le stroke pour le remplissage transparent */
+    opacity: 0.1;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .connexion-text {
+        font-size: 2.5rem;
+    }
+}
+
+/*test*/
+
 @keyframes pulse {
     0%, 100% { opacity: 0.5; transform: scale(1); }
     50% { opacity: 0.8; transform: scale(1.05); }
