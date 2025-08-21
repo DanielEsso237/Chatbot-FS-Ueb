@@ -1,0 +1,301 @@
+
+:root {
+    --primary-blue: #1e40af;
+    --secondary-blue: #3b82f6;
+    --accent-gold: #fbbf24;
+    --dark-bg: #0f172a;
+    --card-bg: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #64748b;
+    --border-color: #334155;
+    --success-color: #10b981;
+    --error-color: #ef4444;
+    --shadow-primary: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    --shadow-secondary: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+.stApp {
+    background: linear-gradient(135deg, var(--dark-bg) 0%, #1a2332 100%) !important;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+#MainMenu {visibility: hidden;}
+.stDeployButton {display: none;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+
+
+.login-container {
+    max-width: 450px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* ===== HEADER AVEC LOGO ===== */
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem 0;
+}
+
+.logo-container {
+    margin-bottom: 1.5rem;
+}
+
+.logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid var(--accent-gold);
+    box-shadow: var(--shadow-secondary);
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
+
+.login-title {
+    color: var(--text-primary);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--secondary-blue), var(--accent-gold));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.login-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* ===== FORMULAIRE ===== */
+.form-container {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: var(--shadow-primary);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.form-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-blue), var(--accent-gold), var(--secondary-blue));
+}
+
+/* ===== CHAMPS DE SAISIE ===== */
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+.stTextInput > div > div > input {
+    background-color: var(--dark-bg) !important;
+    border: 2px solid var(--border-color) !important;
+    border-radius: 12px !important;
+    padding: 1rem !important;
+    color: var(--text-primary) !important;
+    font-size: 1rem !important;
+    transition: all 0.3s ease !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.stTextInput > div > div > input:focus {
+    border-color: var(--secondary-blue) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+    outline: none !important;
+}
+
+.stTextInput > div > div > input::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* Labels des champs */
+.stTextInput > label {
+    color: var(--text-secondary) !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* ===== BOUTON DE CONNEXION ===== */
+.button-container {
+    margin-top: 2rem;
+}
+
+.stFormSubmitButton > button {
+    background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue)) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 1rem 2rem !important;
+    color: var(--text-primary) !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    width: 100% !important;
+    transition: all 0.3s ease !important;
+    box-shadow: var(--shadow-secondary) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.stFormSubmitButton > button:hover {
+    background: linear-gradient(135deg, var(--secondary-blue), var(--accent-gold)) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 15px 30px -5px rgba(59, 130, 246, 0.4) !important;
+}
+
+.stFormSubmitButton > button:active {
+    transform: translateY(0) !important;
+}
+
+/* ===== MESSAGES D'ÉTAT ===== */
+.success-message {
+    background: linear-gradient(135deg, var(--success-color), #059669);
+    color: white;
+    padding: 1rem;
+    border-radius: 12px;
+    margin: 1rem 0;
+    text-align: center;
+    font-weight: 600;
+    box-shadow: var(--shadow-secondary);
+    animation: slideIn 0.3s ease;
+}
+
+.error-message {
+    background: linear-gradient(135deg, var(--error-color), #dc2626);
+    color: white;
+    padding: 1rem;
+    border-radius: 12px;
+    margin: 1rem 0;
+    text-align: center;
+    font-weight: 600;
+    box-shadow: var(--shadow-secondary);
+    animation: slideIn 0.3s ease;
+}
+
+/* ===== FOOTER ===== */
+.login-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.help-text {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.form-container {
+    animation: fadeIn 0.5s ease;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .login-container {
+        margin: 1rem auto;
+        padding: 0 0.5rem;
+    }
+    
+    .form-container {
+        padding: 2rem 1.5rem;
+    }
+    
+    .login-title {
+        font-size: 1.75rem;
+    }
+    
+    .logo {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-container {
+        padding: 1.5rem 1rem;
+    }
+    
+    .login-title {
+        font-size: 1.5rem;
+    }
+    
+    .logo {
+        width: 80px;
+        height: 80px;
+    }
+}
+
+/* ===== AMÉLIORATION DE L'ACCESSIBILITÉ ===== */
+.stTextInput > div > div > input:focus-visible {
+    outline: 2px solid var(--accent-gold) !important;
+    outline-offset: 2px !important;
+}
+
+.stFormSubmitButton > button:focus-visible {
+    outline: 2px solid var(--accent-gold) !important;
+    outline-offset: 2px !important;
+}
+
+/* ===== EFFETS VISUELS AVANCÉS ===== */
+.form-container {
+    position: relative;
+}
+
+.form-container::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+}
