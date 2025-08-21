@@ -1,5 +1,6 @@
 import streamlit as st
 from views.login import login_page
+from views.register import register_page
 from views.chatbot import VectorialSearchGemma
 
 
@@ -9,6 +10,8 @@ def main():
 
     if st.session_state.page == "login":
         login_page()
+    elif st.session_state.page == "register":
+        register_page()
     elif st.session_state.page == "app":
         app = VectorialSearchGemma(pdf_folder="pdfs")
         app.prepare_data()

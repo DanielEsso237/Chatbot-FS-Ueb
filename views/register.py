@@ -1,7 +1,6 @@
 import streamlit as st
 import os
 import base64
-from views.register import register_page
 
 
 USERS = {
@@ -16,24 +15,24 @@ def load_css():
         with open(css_file, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-
 def get_base64_image(image_path):
+    
     with open(image_path, "rb") as img_file:
         b64 = base64.b64encode(img_file.read()).decode()
     return f"data:image/png;base64,{b64}"
 
 
-def login_page():
+def register_page():
     st.set_page_config(
-        page_title="Chatbot FS - Connexion",
+        page_title="Chatbot FS - Inscription",
         page_icon="🎓",
         layout="centered",
         initial_sidebar_state="collapsed"
     )
 
+    
     load_css()
-
-    # Logo
+    
     logo_path = "assets/images/logo.png"
     if os.path.exists(logo_path):
         logo_b64 = get_base64_image(logo_path)
@@ -41,7 +40,7 @@ def login_page():
     else:
         logo_html = '<div class="logo-placeholder"></div>'
 
-    # Header
+    
     st.markdown(f"""
         <div class="login-container">
             <div class="login-header">
@@ -54,12 +53,11 @@ def login_page():
         </div>
     """, unsafe_allow_html=True)
 
-    # Formulaire
+    
     st.markdown("""
-    <div class="form-container">
-        <div class="connexion-text">CONNEXION</div>
-    """, unsafe_allow_html=True)
-
+<div class="form-container">
+    <div class="connexion-text">INSCRIPTION</div>
+""", unsafe_allow_html=True)
     with st.form("login_form", clear_on_submit=False):
         st.markdown('<div class="input-group">', unsafe_allow_html=True)
         username = st.text_input(
@@ -68,7 +66,15 @@ def login_page():
             key="username_input"
         )
         st.markdown('</div>', unsafe_allow_html=True)
-
+        
+        st.markdown('<div class="input-group">', unsafe_allow_html=True)
+        username = st.text_input(
+            "Adresse e-mail",
+            placeholder="Entrez votre adresse e-mail",
+            key="email_input"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
+        
         st.markdown('<div class="input-group">', unsafe_allow_html=True)
         password = st.text_input(
             "Mot de passe",
@@ -76,14 +82,22 @@ def login_page():
             placeholder="Entrez votre mot de passe",
             key="password_input"
         )
+        
+        st.markdown('<div class="input-group">', unsafe_allow_html=True)
+        password = st.text_input(
+            "Confirmer le mot de passe",
+            type="password",
+            placeholder="Entrez votre mot de passe",
+            key="confirm_password_input"
+        )
         st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<div class="button-container">', unsafe_allow_html=True)
-        submit = st.form_submit_button(" Se connecter", use_container_width=True)
+        submit = st.form_submit_button(" S'inscrire", use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)  # Fermeture du form-container
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    # Vérification login
+    
     if submit:
         if username.strip() == "":
             st.markdown('<div class="error-message">⚠️ Veuillez saisir un nom d\'utilisateur</div>', unsafe_allow_html=True)
@@ -98,14 +112,12 @@ def login_page():
         else:
             st.markdown('<div class="error-message">❌ Identifiants invalides</div>', unsafe_allow_html=True)
 
-    
     st.markdown('<div class="register-link" style="text-align:center; margin-top:10px;">', unsafe_allow_html=True)
-    if st.button("Vous n'avez pas de compte ? Inscrivez-vous"):
-        st.session_state.page = "register"
+    if st.button("Se connecter"):
+        st.session_state.page = "login"
         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
-
-    # Footer
+    
     st.markdown("""
         <div class="login-footer">
             <p>© 2025 Université d'Ebolowa - Faculté des Sciences</p>
