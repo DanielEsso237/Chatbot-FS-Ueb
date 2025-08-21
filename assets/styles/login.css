@@ -42,7 +42,6 @@ header {visibility: hidden;}
     padding: 0 1rem;
 }
 
-/* ===== HEADER AVEC LOGO ===== */
 .login-header {
     text-align: center;
     margin-bottom: 2rem;
@@ -84,7 +83,7 @@ header {visibility: hidden;}
     font-weight: 500;
 }
 
-/* ===== FORMULAIRE ===== */
+
 .form-container {
     background: var(--card-bg);
     border-radius: 16px;
@@ -132,7 +131,7 @@ header {visibility: hidden;}
     color: var(--text-muted) !important;
 }
 
-/* Labels des champs */
+
 .stTextInput > label {
     color: var(--text-secondary) !important;
     font-weight: 600 !important;
@@ -140,7 +139,7 @@ header {visibility: hidden;}
     margin-bottom: 0.5rem !important;
 }
 
-/* ===== BOUTON DE CONNEXION ===== */
+
 .button-container {
     margin-top: 2rem;
 }
@@ -170,7 +169,6 @@ header {visibility: hidden;}
     transform: translateY(0) !important;
 }
 
-/* ===== MESSAGES D'ÉTAT ===== */
 .success-message {
     background: linear-gradient(135deg, var(--success-color), #059669);
     color: white;
@@ -294,6 +292,34 @@ header {visibility: hidden;}
     animation: pulse 4s ease-in-out infinite;
     pointer-events: none;
 }
+
+/*test*/
+.connexion-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); 
+    z-index: 1;
+    font-size: 3rem;
+    font-weight: 800;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--text-primary);
+    background: linear-gradient(135deg, var(--secondary-blue), var(--accent-gold)); 
+    background-clip: text; 
+    -webkit-background-clip: text
+    -webkit-text-fill-color: transparent; 
+    opacity: 0.1;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .connexion-text {
+        font-size: 2.5rem;
+    }
+}
+
+
 
 @keyframes pulse {
     0%, 100% { opacity: 0.5; transform: scale(1); }
