@@ -26,6 +26,12 @@ class LoginPage:
             initial_sidebar_state="collapsed"
         )
         self._load_css()
+        
+        # Vérifie si l'inscription a réussi et affiche un message de succès
+        if st.session_state.get("registration_success"):
+            st.success("Compte créé avec succès ! Veuillez vous connecter.")
+            # Supprime la variable de session pour que le message ne réapparaisse pas
+            del st.session_state["registration_success"]
 
         logo_path = "assets/images/logo.png"
         if os.path.exists(logo_path):
