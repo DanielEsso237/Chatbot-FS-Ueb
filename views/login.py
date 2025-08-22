@@ -2,6 +2,7 @@ import streamlit as st
 import os
 import base64
 from backend.auth import AuthManager
+from utils.cookies import set_cookie
 
 class LoginPage:
     def __init__(self):
@@ -26,6 +27,10 @@ class LoginPage:
             initial_sidebar_state="collapsed"
         )
         self._load_css()
+        
+        if st.session_state.get("registration_success"):
+            st.success("Compte créé avec succès ! Veuillez vous connecter.")
+            del st.session_state["registration_success"]
 
         logo_path = "assets/images/logo.png"
         if os.path.exists(logo_path):
@@ -83,6 +88,8 @@ class LoginPage:
                     st.session_state["logged_in"] = True
                     st.session_state["username"] = user
                     st.session_state.page = "app"
+                    # Sauvegarder le nom d'utilisateur dans un cookie pour la persistance
+                    set_cookie("username", user)
                     st.rerun()
                 else:
                     st.markdown(f'<div class="error-message">❌ {message}</div>', unsafe_allow_html=True)

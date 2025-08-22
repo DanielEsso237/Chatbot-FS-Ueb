@@ -6,13 +6,6 @@ from PyPDF2 import PdfReader
 from sentence_transformers import SentenceTransformer
 import faiss
 
-st.set_page_config(
-    page_title="Chatbot FS-UEb",
-    page_icon="🎓",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
 def load_custom_css():
     with open("assets/styles/chatbot.css", "r") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
@@ -195,8 +188,9 @@ Règles :
         </div>
         """, unsafe_allow_html=True)
 
-if __name__ == "__main__":
-    vs = VectorialSearchGemma(pdf_folder="pdfs")
-    vs.prepare_data()
-    vs.load_index()
-    vs.render()
+# Le bloc ci-dessous a été supprimé pour éviter l'erreur d'importation.
+# if __name__ == "__main__":
+#     vs = VectorialSearchGemma(pdf_folder="pdfs")
+#     vs.prepare_data()
+#     vs.load_index()
+#     vs.render()
