@@ -1,7 +1,7 @@
 import streamlit as st
 from views.login import LoginPage
 from views.register import RegisterPage
-from views.chatbot import VectorialSearchGemma
+from views.chatbot import ChatbotUI
 from dotenv import load_dotenv 
 from utils.cookies import get_cookie_value_from_js, set_cookie
 
@@ -28,12 +28,11 @@ def main():
         login_page.render()
     elif st.session_state.page == "register":
         register_page = RegisterPage()
-        register_page.render()
+        register_page()
     elif st.session_state.page == "app":
-        app = VectorialSearchGemma(pdf_folder="pdfs")
-        app.prepare_data()
-        app.load_index()
-        app.render()
+        
+        app_ui = ChatbotUI(pdf_folder="pdfs")
+        app_ui.render()
         
         if st.sidebar.button("🚪 Déconnexion"):
             # Efface les cookies et l'état de la session
@@ -44,3 +43,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
