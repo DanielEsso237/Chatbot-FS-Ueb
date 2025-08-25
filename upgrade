@@ -1,0 +1,1 @@
+pip install --upgrade streamlit==1.48.0 streamlit-cookies-manager huggingface_hub sentence_transformers fsspec joblib jsonschema psycopg2-binary bcrypt PyPDF2 faiss-cpu requests python-dotenv

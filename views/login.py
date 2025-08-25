@@ -22,7 +22,6 @@ class LoginPage:
     def render(self):
         st.set_page_config(
             page_title="Chatbot FS - Connexion",
-            page_icon="🎓",
             layout="centered",
             initial_sidebar_state="collapsed"
         )
