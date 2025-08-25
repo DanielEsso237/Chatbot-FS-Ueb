@@ -77,5 +77,5 @@ Réponse:
 
     def run_query(self, user_query):
         rag_chain = self.create_rag_chain()
-        response = rag_chain.invoke(user_query)
-        return response
+        return rag_chain.stream(user_query)
+
