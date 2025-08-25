@@ -83,9 +83,9 @@ class ChatbotUI:
 
             with st.chat_message("assistant"):
                 with st.spinner("🤔 Recherche dans les documents..."):
-                    response = self.chatbot_logic.run_query(user_query)
-                st.markdown(response)
-                st.session_state.messages.append({"role": "assistant", "content": response})
+                    response_stream = self.chatbot_logic.run_query(user_query)
+                    full_response = st.write_stream(response_stream)
+                st.session_state.messages.append({"role": "assistant", "content": full_response})
         
         st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("---")
@@ -95,3 +95,4 @@ class ChatbotUI:
             <p>Esso Daniel - OPENMIND ACADEMY</p>
         </div>
         """, unsafe_allow_html=True)
+
