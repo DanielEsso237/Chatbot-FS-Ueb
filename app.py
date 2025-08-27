@@ -4,7 +4,6 @@ from views.register import RegisterPage
 from views.chatbot import ChatbotUI
 from dotenv import load_dotenv 
 from utils.cookies import get_cookie_value_from_js, set_cookie
-
 load_dotenv() 
 
 def main():
@@ -27,8 +26,9 @@ def main():
         login_page = LoginPage()
         login_page.render()
     elif st.session_state.page == "register":
-        register_page = RegisterPage()
-        register_page()
+      register_page = RegisterPage()
+      register_page.render()
+
     elif st.session_state.page == "app":
         
         app_ui = ChatbotUI(pdf_folder="pdfs")

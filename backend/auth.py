@@ -19,7 +19,8 @@ class AuthManager:
                 host=self.db_host,
                 port=self.db_port
             )
-        except psycopg2.OperationalError:
+        except psycopg2.OperationalError as e:
+            print("Erreur PostgreSQL :", e)
             return None
     
     def hash_password(self, password):

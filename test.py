@@ -1,21 +1,18 @@
-import streamlit as st
+import psycopg2
+from dotenv import load_dotenv
 import os
 
-uploaded_files = st.file_uploader(
-    "Choose a CSV file", accept_multiple_files=True
-)
+load_dotenv()
 
-# Dossier où tu veux conserver les fichiers
-save_dir = "uploads"
-os.makedirs(save_dir, exist_ok=True)
-
-if uploaded_files:
-    for uploaded_file in uploaded_files:
-        # Construire le chemin de destination
-        save_path = os.path.join(save_dir, uploaded_file.name)
-        
-        # Sauvegarder le fichier sur le disque
-        with open(save_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
-        
-        st.success(f"Fichier sauvegardé : {save_path}")
+try:
+    conn = psycopg2.connect(
+        dbname=os.getenv("DB_NAME"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        host=os.getenv("DB_HOST"),
+        port=os.getenv("DB_PORT")
+    )
+    print("Connexion réussie !")
+    conn.close()
+except Exception as e:
+    print("Erreur PostgreSQL :", e)
