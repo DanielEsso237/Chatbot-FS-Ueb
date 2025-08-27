@@ -1,11 +1,9 @@
 import os
 import streamlit as st
-import base64
 from dotenv import load_dotenv
 from backend.chatbot_logic import ChatbotLogic
 
 load_dotenv()
-
 
 def load_custom_css():
     css_file = "assets/styles/chatbot.css"
@@ -71,7 +69,10 @@ class ChatbotUI:
         st.markdown('<div class="fade-in">', unsafe_allow_html=True)
         if "messages" not in st.session_state:
             st.session_state.messages = []
-        
+
+        # Limiter à 20 derniers messages
+        st.session_state.messages = st.session_state.messages[-20:]
+
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
@@ -95,4 +96,3 @@ class ChatbotUI:
             <p>Esso Daniel - OPENMIND ACADEMY</p>
         </div>
         """, unsafe_allow_html=True)
-
