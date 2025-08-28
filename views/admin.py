@@ -26,7 +26,8 @@ class AdminPage:
         st.markdown(f"""
         <div class="admin-header">
             {'<img src="data:image/png;base64,' + logo_b64 + '" class="admin-logo"/>' if logo_b64 else '🎓'}
-            <h1>📚 Espace Administrateur</h1>
+            <h1>Chatbot Faculté des Sciences</h1>
+            <h2>📚 Espace Administrateur</h2>
             <p>Ajoutez de nouveaux documents PDF pour le chatbot</p>
         </div>
         """, unsafe_allow_html=True)
