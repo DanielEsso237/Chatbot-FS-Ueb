@@ -1,0 +1,36 @@
+.admin-header {
+    text-align: center;
+    padding: 1rem;
+    background-color: #2563eb;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.admin-logo {
+    width: 80px;
+    height: auto;
+    margin-bottom: 0.5rem;
+}
+
+h1, h3 {
+    color: #1f2937;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+h3 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.stButton>button {
+    background-color: #2563eb;
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+}
+
+.stButton>button:hover {
+    background-color: #1d4ed8;
+}
