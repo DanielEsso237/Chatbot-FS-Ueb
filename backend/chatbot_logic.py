@@ -3,32 +3,40 @@ import pickle
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
-from langchain_community.llms import Ollama
+from langchain_ollama import OllamaLLM
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnablePassthrough
 from langchain.schema.output_parser import StrOutputParser
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-
 
 class ChatbotLogic:
     def __init__(self, pdf_folder, index_file="faiss_index"):
         self.pdf_folder = pdf_folder
         self.index_file = index_file
 
-        # Initialiser le modèle d'embeddings
+        
         self.model_path = r"C:\Users\T.SHIGARAKI\.cache\huggingface\hub\models--sentence-transformers--all-MiniLM-L12-v2\snapshots\c004d8e3e901237d8fa7e9fff12774962e391ce5"
-        self.embeddings = HuggingFaceEmbeddings(
-            model_name=self.model_path,
-            model_kwargs={'device': 'cpu'}  # Forcer l'utilisation du CPU
-        )
+        try:
+            print("Initialisation de HuggingFaceEmbeddings")
+            self.embeddings = HuggingFaceEmbeddings(model_name=self.model_path)
+            print("HuggingFaceEmbeddings initialisé avec succès")
+        except Exception as e:
+            print(f"Erreur lors de l'initialisation de HuggingFaceEmbeddings : {e}")
+            raise
 
-        # Initialiser le modèle LLM
-        self.llm = Ollama(model="gemma:2b", base_url="http://127.0.0.1:11434")
+       
+        try:
+            print("Initialisation de OllamaLLM")
+            self.llm = OllamaLLM(model="gemma:2b", base_url="http://127.0.0.1:11434")
+            print("OllamaLLM initialisé avec succès")
+        except Exception as e:
+            print(f"Erreur lors de l'initialisation de OllamaLLM : {e}")
+            raise
 
         self.retriever = None
         self.cache_responses = {}
 
-        # Définir le prompt système
+        
         self.system_prompt = """
 Tu es un assistant spécialisé dans l’extraction d’informations à partir de documents. 
 Ta mission est de répondre à la question de l’utilisateur uniquement en utilisant le contexte fourni. 
@@ -49,23 +57,21 @@ Réponse:
         texts_file = os.path.join(self.pdf_folder, "texts.pkl")
         files_list_file = os.path.join(self.pdf_folder, "files_list.pkl")
 
-        # Vérifier si le dossier PDF existe
+        
         if not os.path.exists(self.pdf_folder):
             print(f"Erreur : le dossier {self.pdf_folder} n'existe pas.")
             st_session_state.texts = []
             return
 
-        # Liste des fichiers PDF
         current_files = [f for f in os.listdir(self.pdf_folder) if f.endswith(".pdf")]
         print(f"Fichiers PDF trouvés : {current_files}")
 
-        # Si aucun fichier PDF, initialiser texts à une liste vide
         if not current_files:
             print("Aucun fichier PDF trouvé dans le dossier.")
             st_session_state.texts = []
             return
 
-        # Vérifier si les fichiers pickle existent et correspondent
+        
         if os.path.exists(texts_file) and os.path.exists(files_list_file):
             try:
                 with open(files_list_file, "rb") as f:
@@ -80,7 +86,7 @@ Réponse:
             except Exception as e:
                 print(f"Erreur lors du chargement des fichiers pickle : {e}")
 
-        # Charger et diviser les documents
+        
         documents = []
         for file in current_files:
             try:
@@ -102,7 +108,7 @@ Réponse:
         st_session_state.texts = text_splitter.split_documents(documents)
         print(f"Textes divisés : {len(st_session_state.texts)} segments")
 
-        # Sauvegarder textes + liste de fichiers
+       
         try:
             with open(texts_file, "wb") as f:
                 pickle.dump(st_session_state.texts, f)
@@ -115,17 +121,17 @@ Réponse:
     def load_index(self, st_session_state):
         if "retriever" in st_session_state and st_session_state.retriever:
             self.retriever = st_session_state.retriever
-            print("Retraver chargé depuis st_session_state.")
+            print("Retriever chargé depuis st_session_state.")
             return
 
-        # Vérifier si texts existe et n'est pas vide
+        
         if not hasattr(st_session_state, "texts") or not st_session_state.texts:
             print("Erreur : Aucun texte disponible pour créer l'index FAISS.")
             self.retriever = None
             st_session_state.retriever = None
             return
 
-        # Construire l'index FAISS
+        
         try:
             db = FAISS.from_documents(st_session_state.texts, self.embeddings)
             db.save_local(self.index_file)
