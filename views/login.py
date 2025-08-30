@@ -15,9 +15,13 @@ class LoginPage:
                 st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
     def _get_base64_image(self, image_path):
-        with open(image_path, "rb") as img_file:
-            b64 = base64.b64encode(img_file.read()).decode()
-        return f"data:image/png;base64,{b64}"
+        try:
+            with open(image_path, "rb") as img_file:
+                b64 = base64.b64encode(img_file.read()).decode()
+            return f"data:image/png;base64,{b64}"
+        except Exception as e:
+            print(f"Erreur lors du chargement de l'image {image_path}: {e}")
+            return ""
 
     def render(self):
         st.set_page_config(
@@ -50,37 +54,41 @@ class LoginPage:
 
         st.markdown('<div class="form-container"><div class="connexion-text">CONNEXION</div>', unsafe_allow_html=True)
 
-        with st.form("login_form", clear_on_submit=False):
+        with st.form("login_form", clear_on_submit=True):
             st.markdown('<div class="input-group">', unsafe_allow_html=True)
-            username = st.text_input("Nom d'utilisateur", placeholder="Entrez votre nom d'utilisateur")
+            username = st.text_input("Nom d'utilisateur", placeholder="Entrez votre nom d'utilisateur", key="login_username")
             st.markdown('</div>', unsafe_allow_html=True)
 
             st.markdown('<div class="input-group">', unsafe_allow_html=True)
-            password = st.text_input("Mot de passe", type="password", placeholder="Entrez votre mot de passe")
+            password = st.text_input("Mot de passe", type="password", placeholder="Entrez votre mot de passe", key="login_password")
             st.markdown('</div>', unsafe_allow_html=True)
 
             st.markdown('<div class="button-container">', unsafe_allow_html=True)
-            submit = st.form_submit_button(" Se connecter", use_container_width=True)
+            submit = st.form_submit_button("Se connecter", use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
-        if submit:
-            if not username or not password:
-                st.markdown('<div class="error-message">⚠️ Veuillez saisir un nom d\'utilisateur et un mot de passe</div>', unsafe_allow_html=True)
-            else:
-                success, message, user, role = self.auth_manager.login_user(username, password)
-                if success:
-                    st.session_state["logged_in"] = True
-                    st.session_state["username"] = user
-                    st.session_state["role"] = role
-                    st.session_state.page = "admin" if role == "admin" else "app"
-                    set_cookie("username", user)
-                    st.rerun()
+            if submit:
+                print(f"Tentative de connexion avec username: {username}")
+                if not username or not password:
+                    st.markdown('<div class="error-message">⚠️ Veuillez saisir un nom d\'utilisateur et un mot de passe</div>', unsafe_allow_html=True)
                 else:
-                    st.markdown(f'<div class="error-message">❌ {message}</div>', unsafe_allow_html=True)
+                    success, message, user, role = self.auth_manager.login_user(username, password)
+                    print(f"Résultat de la connexion: success={success}, message={message}, user={user}, role={role}")
+                    if success:
+                        st.session_state["logged_in"] = True
+                        st.session_state["username"] = user
+                        st.session_state["role"] = role
+                        st.session_state.page = "admin" if role == "admin" else "app"
+                        set_cookie("username", user, max_age=86400)
+                        print(f"Connexion réussie, redirection vers {st.session_state.page}")
+                        st.rerun()
+                    else:
+                        st.markdown(f'<div class="error-message">❌ {message}</div>', unsafe_allow_html=True)
+                        set_cookie("username", "", max_age=0)
 
         st.markdown('<div class="register-link" style="text-align:center; margin-top:10px;">', unsafe_allow_html=True)
-        if st.button("Vous n'avez pas de compte ? Inscrivez-vous"):
+        if st.button("Vous n'avez pas de compte ? Inscrivez-vous", key="register_button"):
+            print("Bouton d'inscription cliqué")
             st.session_state.page = "register"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
