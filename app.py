@@ -8,12 +8,14 @@ from utils.cookies import set_cookie, get_cookie
 from backend.auth import AuthManager
 import os
 import pickle
+import time
 
 load_dotenv()
 
 def save_session_state():
     """Sauvegarder l'état de la session dans un fichier temporaire."""
     try:
+        time.sleep(0.1)
         with open("session_state.pkl", "wb") as f:
             pickle.dump({
                 "page": st.session_state.get("page", "login"),
@@ -31,9 +33,8 @@ def load_session_state(auth_manager):
         if os.path.exists("session_state.pkl"):
             with open("session_state.pkl", "rb") as f:
                 state = pickle.load(f)
-                
                 if state.get("logged_in") and state.get("username"):
-                    success, _, user, role = auth_manager.login_user(state["username"], "")
+                    success, _, user, role = auth_manager.check_user_exists(state["username"])
                     if success:
                         st.session_state.page = state.get("page", "login")
                         st.session_state.logged_in = state.get("logged_in", False)
@@ -49,6 +50,7 @@ def load_session_state(auth_manager):
                         set_cookie("username", "", max_age=0)
                         if os.path.exists("session_state.pkl"):
                             os.remove("session_state.pkl")
+                            print("Fichier de session supprimé")
                 else:
                     print("Aucun utilisateur valide dans session_state.pkl")
                     st.session_state.page = "login"
@@ -59,9 +61,13 @@ def load_session_state(auth_manager):
             print("Aucun fichier session_state.pkl trouvé")
     except Exception as e:
         print(f"Erreur lors du chargement de l'état de la session : {e}")
+        st.session_state.page = "login"
+        st.session_state.logged_in = False
+        st.session_state.username = None
+        st.session_state.role = None
 
 def main():
- 
+    
     auth_manager = AuthManager()
 
     
@@ -76,10 +82,10 @@ def main():
 
     print(f"Page actuelle : {st.session_state.page}, logged_in : {st.session_state.logged_in}, username : {st.session_state.username}")
 
-  
+   
     save_session_state()
 
-  
+    
     if st.session_state.page == "login":
         print("Affichage de la page de connexion")
         login_page = LoginPage()
@@ -108,7 +114,7 @@ def main():
                 app_ui = ChatbotUI(pdf_folder="pdfs")
                 app_ui.render()
 
-          
+           
             if st.sidebar.button("🚪 Déconnexion", key="logout_button"):
                 print("Déconnexion demandée")
                 st.session_state.page = "login"
