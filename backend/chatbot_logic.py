@@ -57,21 +57,23 @@ Réponse:
         texts_file = os.path.join(self.pdf_folder, "texts.pkl")
         files_list_file = os.path.join(self.pdf_folder, "files_list.pkl")
 
-        
+       
         if not os.path.exists(self.pdf_folder):
             print(f"Erreur : le dossier {self.pdf_folder} n'existe pas.")
             st_session_state.texts = []
             return
 
+      
         current_files = [f for f in os.listdir(self.pdf_folder) if f.endswith(".pdf")]
         print(f"Fichiers PDF trouvés : {current_files}")
 
+        
         if not current_files:
             print("Aucun fichier PDF trouvé dans le dossier.")
             st_session_state.texts = []
             return
 
-        
+       
         if os.path.exists(texts_file) and os.path.exists(files_list_file):
             try:
                 with open(files_list_file, "rb") as f:
@@ -86,7 +88,7 @@ Réponse:
             except Exception as e:
                 print(f"Erreur lors du chargement des fichiers pickle : {e}")
 
-        
+      
         documents = []
         for file in current_files:
             try:
@@ -108,7 +110,7 @@ Réponse:
         st_session_state.texts = text_splitter.split_documents(documents)
         print(f"Textes divisés : {len(st_session_state.texts)} segments")
 
-       
+        
         try:
             with open(texts_file, "wb") as f:
                 pickle.dump(st_session_state.texts, f)
@@ -131,7 +133,7 @@ Réponse:
             st_session_state.retriever = None
             return
 
-        
+      
         try:
             db = FAISS.from_documents(st_session_state.texts, self.embeddings)
             db.save_local(self.index_file)
