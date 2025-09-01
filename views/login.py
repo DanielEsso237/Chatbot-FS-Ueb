@@ -19,8 +19,7 @@ class LoginPage:
             with open(image_path, "rb") as img_file:
                 b64 = base64.b64encode(img_file.read()).decode()
             return f"data:image/png;base64,{b64}"
-        except Exception as e:
-            print(f"Erreur lors du chargement de l'image {image_path}: {e}")
+        except Exception:
             return ""
 
     def render(self):
@@ -68,19 +67,16 @@ class LoginPage:
             st.markdown('</div>', unsafe_allow_html=True)
 
             if submit:
-                print(f"Tentative de connexion avec username: {username}")
                 if not username or not password:
                     st.markdown('<div class="error-message">⚠️ Veuillez saisir un nom d\'utilisateur et un mot de passe</div>', unsafe_allow_html=True)
                 else:
                     success, message, user, role = self.auth_manager.login_user(username, password)
-                    print(f"Résultat de la connexion: success={success}, message={message}, user={user}, role={role}")
                     if success:
                         st.session_state["logged_in"] = True
                         st.session_state["username"] = user
                         st.session_state["role"] = role
                         st.session_state.page = "admin" if role == "admin" else "app"
                         set_cookie("username", user, max_age=86400)
-                        print(f"Connexion réussie, redirection vers {st.session_state.page}")
                         st.rerun()
                     else:
                         st.markdown(f'<div class="error-message">❌ {message}</div>', unsafe_allow_html=True)
@@ -88,7 +84,6 @@ class LoginPage:
 
         st.markdown('<div class="register-link" style="text-align:center; margin-top:10px;">', unsafe_allow_html=True)
         if st.button("Vous n'avez pas de compte ? Inscrivez-vous", key="register_button"):
-            print("Bouton d'inscription cliqué")
             st.session_state.page = "register"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)

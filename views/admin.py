@@ -56,6 +56,12 @@ class AdminPage:
             st.info("Aucun fichier PDF présent pour le moment.")
 
     def render(self):
+        
+        st.set_page_config(
+            page_title="Chatbot FS - Admin",
+            layout="centered",
+            initial_sidebar_state="collapsed"
+        )
         self._load_css()
         self.render_header()
         st.markdown("---")

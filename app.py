@@ -23,9 +23,8 @@ def save_session_state():
                 "username": st.session_state.get("username", None),
                 "role": st.session_state.get("role", None)
             }, f)
-        print("État de la session sauvegardé")
-    except Exception as e:
-        print(f"Erreur lors de la sauvegarde de l'état de la session : {e}")
+    except Exception:
+        pass
 
 def load_session_state(auth_manager):
     """Charger l'état de la session depuis un fichier temporaire."""
@@ -40,9 +39,7 @@ def load_session_state(auth_manager):
                         st.session_state.logged_in = state.get("logged_in", False)
                         st.session_state.username = state.get("username", None)
                         st.session_state.role = state.get("role", None)
-                        print("État de la session chargé avec succès")
                     else:
-                        print("Utilisateur non valide dans session_state.pkl, réinitialisation")
                         st.session_state.page = "login"
                         st.session_state.logged_in = False
                         st.session_state.username = None
@@ -50,29 +47,23 @@ def load_session_state(auth_manager):
                         set_cookie("username", "", max_age=0)
                         if os.path.exists("session_state.pkl"):
                             os.remove("session_state.pkl")
-                            print("Fichier de session supprimé")
                 else:
-                    print("Aucun utilisateur valide dans session_state.pkl")
                     st.session_state.page = "login"
                     st.session_state.logged_in = False
                     st.session_state.username = None
                     st.session_state.role = None
         else:
-            print("Aucun fichier session_state.pkl trouvé")
-    except Exception as e:
-        print(f"Erreur lors du chargement de l'état de la session : {e}")
+            pass
+    except Exception:
         st.session_state.page = "login"
         st.session_state.logged_in = False
         st.session_state.username = None
         st.session_state.role = None
 
 def main():
-    
     auth_manager = AuthManager()
 
-    
     if "page" not in st.session_state:
-        print("Initialisation de st.session_state")
         load_session_state(auth_manager)
         if "page" not in st.session_state:
             st.session_state.page = "login"
@@ -80,23 +71,16 @@ def main():
             st.session_state.username = None
             st.session_state.role = None
 
-    print(f"Page actuelle : {st.session_state.page}, logged_in : {st.session_state.logged_in}, username : {st.session_state.username}")
-
-   
     save_session_state()
 
-    
     if st.session_state.page == "login":
-        print("Affichage de la page de connexion")
         login_page = LoginPage()
         login_page.render()
     elif st.session_state.page == "register":
-        print("Affichage de la page d'inscription")
         register_page = RegisterPage()
         register_page.render()
     elif st.session_state.page in ["app", "admin"]:
         if not st.session_state.logged_in or not st.session_state.username:
-            print("Utilisateur non connecté, redirection vers login")
             st.session_state.page = "login"
             st.session_state.logged_in = False
             st.session_state.username = None
@@ -105,7 +89,6 @@ def main():
             save_session_state()
             st.rerun()
         else:
-            print(f"Affichage de la page {st.session_state.page} pour l'utilisateur {st.session_state.username}")
             role = st.session_state.get("role")
             if role == "admin":
                 admin_ui = AdminPage()
@@ -114,9 +97,7 @@ def main():
                 app_ui = ChatbotUI(pdf_folder="pdfs")
                 app_ui.render()
 
-           
             if st.sidebar.button("🚪 Déconnexion", key="logout_button"):
-                print("Déconnexion demandée")
                 st.session_state.page = "login"
                 st.session_state.logged_in = False
                 st.session_state.username = None
@@ -125,7 +106,6 @@ def main():
                 save_session_state()
                 if os.path.exists("session_state.pkl"):
                     os.remove("session_state.pkl")
-                    print("Fichier de session supprimé")
                 st.rerun()
 
 if __name__ == "__main__":

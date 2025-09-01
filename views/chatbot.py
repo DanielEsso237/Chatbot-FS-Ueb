@@ -59,6 +59,11 @@ class ChatbotUI:
             """)
 
     def render(self):
+        st.set_page_config(
+            page_title="Chatbot FS ",
+            layout="centered",
+            initial_sidebar_state="collapsed"
+        )
         load_custom_css()
         self.render_header()
         self.render_sidebar()
@@ -70,7 +75,6 @@ class ChatbotUI:
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
-        # Limiter à 20 derniers messages
         st.session_state.messages = st.session_state.messages[-20:]
 
         for message in st.session_state.messages:

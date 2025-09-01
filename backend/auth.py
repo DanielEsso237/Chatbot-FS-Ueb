@@ -20,10 +20,8 @@ class AuthManager:
                 host=self.db_host,
                 port=self.db_port
             )
-            print("Connexion à la base de données réussie")
             return conn
-        except psycopg2.OperationalError as e:
-            print(f"Erreur PostgreSQL: {e}")
+        except psycopg2.OperationalError:
             return None
 
     def register_user(self, username, email, password):
@@ -40,7 +38,6 @@ class AuthManager:
                 cursor.close()
                 return False, "Le nom d'utilisateur ou l'email existe déjà."
 
-            
             hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             hashed_password_str = hashed_password.decode('utf-8')  
             cursor.execute(
@@ -51,7 +48,6 @@ class AuthManager:
             cursor.close()
             return True, "Inscription réussie."
         except Exception as e:
-            print(f"Erreur lors de l'inscription: {e}")
             return False, f"Erreur: {e}"
 
     def login_user(self, username, password):
@@ -68,7 +64,6 @@ class AuthManager:
             cursor.close()
             
             if user_data:
-               
                 stored_password_hash = user_data[1].encode('utf-8')
                 if bcrypt.checkpw(password.encode('utf-8'), stored_password_hash):
                     return True, "Connexion réussie.", user_data[0], user_data[2]
@@ -77,11 +72,9 @@ class AuthManager:
             else:
                 return False, "Utilisateur non trouvé.", None, None
         except Exception as e:
-            print(f"Erreur lors de la connexion: {e}")
             return False, f"Erreur: {e}", None, None
 
     def check_user_exists(self, username):
-        """Vérifier si un utilisateur existe dans la base de données."""
         if not self.conn:
             return False, "Erreur de connexion à la base de données.", None, None
         
@@ -99,10 +92,8 @@ class AuthManager:
             else:
                 return False, "Utilisateur non trouvé.", None, None
         except Exception as e:
-            print(f"Erreur lors de la vérification de l'utilisateur: {e}")
             return False, f"Erreur: {e}", None, None
 
     def __del__(self):
         if self.conn:
             self.conn.close()
-            print("Connexion à la base de données fermée")

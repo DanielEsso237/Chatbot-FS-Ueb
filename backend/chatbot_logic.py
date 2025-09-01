@@ -14,29 +14,13 @@ class ChatbotLogic:
         self.pdf_folder = pdf_folder
         self.index_file = index_file
 
-        
         self.model_path = r"C:\Users\T.SHIGARAKI\.cache\huggingface\hub\models--sentence-transformers--all-MiniLM-L12-v2\snapshots\c004d8e3e901237d8fa7e9fff12774962e391ce5"
-        try:
-            print("Initialisation de HuggingFaceEmbeddings")
-            self.embeddings = HuggingFaceEmbeddings(model_name=self.model_path)
-            print("HuggingFaceEmbeddings initialisé avec succès")
-        except Exception as e:
-            print(f"Erreur lors de l'initialisation de HuggingFaceEmbeddings : {e}")
-            raise
-
-       
-        try:
-            print("Initialisation de OllamaLLM")
-            self.llm = OllamaLLM(model="gemma:2b", base_url="http://127.0.0.1:11434")
-            print("OllamaLLM initialisé avec succès")
-        except Exception as e:
-            print(f"Erreur lors de l'initialisation de OllamaLLM : {e}")
-            raise
+        self.embeddings = HuggingFaceEmbeddings(model_name=self.model_path)
+        self.llm = OllamaLLM(model="gemma:2b", base_url="http://127.0.0.1:11434")
 
         self.retriever = None
         self.cache_responses = {}
 
-        
         self.system_prompt = """
 Tu es un assistant spécialisé dans l’extraction d’informations à partir de documents. 
 Ta mission est de répondre à la question de l’utilisateur uniquement en utilisant le contexte fourni. 
@@ -57,23 +41,16 @@ Réponse:
         texts_file = os.path.join(self.pdf_folder, "texts.pkl")
         files_list_file = os.path.join(self.pdf_folder, "files_list.pkl")
 
-       
         if not os.path.exists(self.pdf_folder):
-            print(f"Erreur : le dossier {self.pdf_folder} n'existe pas.")
             st_session_state.texts = []
             return
 
-      
         current_files = [f for f in os.listdir(self.pdf_folder) if f.endswith(".pdf")]
-        print(f"Fichiers PDF trouvés : {current_files}")
 
-        
         if not current_files:
-            print("Aucun fichier PDF trouvé dans le dossier.")
             st_session_state.texts = []
             return
 
-       
         if os.path.exists(texts_file) and os.path.exists(files_list_file):
             try:
                 with open(files_list_file, "rb") as f:
@@ -82,23 +59,19 @@ Réponse:
                 if set(current_files) == set(old_files):
                     with open(texts_file, "rb") as f:
                         st_session_state.texts = pickle.load(f)
-                    cont = len(st_session_state.texts)
-                    print(f"Textes chargés depuis {texts_file}: {cont} documents")
                     return
-            except Exception as e:
-                print(f"Erreur lors du chargement des fichiers pickle : {e}")
+            except:
+                pass
 
-      
         documents = []
         for file in current_files:
             try:
                 loader = PyPDFLoader(os.path.join(self.pdf_folder, file))
                 documents.extend(loader.load())
-            except Exception as e:
-                print(f"Erreur lors du chargement de {file}: {e}")
+            except:
+                pass
 
         if not documents:
-            print("Aucun document chargé.")
             st_session_state.texts = []
             return
 
@@ -108,46 +81,36 @@ Réponse:
             length_function=len
         )
         st_session_state.texts = text_splitter.split_documents(documents)
-        print(f"Textes divisés : {len(st_session_state.texts)} segments")
 
-        
         try:
             with open(texts_file, "wb") as f:
                 pickle.dump(st_session_state.texts, f)
             with open(files_list_file, "wb") as f:
                 pickle.dump(current_files, f)
-            print("Fichiers pickle sauvegardés avec succès.")
-        except Exception as e:
-            print(f"Erreur lors de la sauvegarde des fichiers pickle : {e}")
+        except:
+            pass
 
     def load_index(self, st_session_state):
         if "retriever" in st_session_state and st_session_state.retriever:
             self.retriever = st_session_state.retriever
-            print("Retriever chargé depuis st_session_state.")
             return
 
-        
         if not hasattr(st_session_state, "texts") or not st_session_state.texts:
-            print("Erreur : Aucun texte disponible pour créer l'index FAISS.")
             self.retriever = None
             st_session_state.retriever = None
             return
 
-      
         try:
             db = FAISS.from_documents(st_session_state.texts, self.embeddings)
             db.save_local(self.index_file)
             self.retriever = db.as_retriever()
             st_session_state.retriever = self.retriever
-            print("Index FAISS créé avec succès.")
-        except Exception as e:
-            print(f"Erreur lors de la création de l'index FAISS : {e}")
+        except:
             self.retriever = None
             st_session_state.retriever = None
 
     def create_rag_chain(self):
         if not self.retriever:
-            print("Erreur : Retriever non initialisé.")
             return None
         prompt = ChatPromptTemplate.from_template(self.system_prompt)
         chain = (
@@ -160,7 +123,6 @@ Réponse:
 
     def run_query(self, user_query):
         if user_query in self.cache_responses:
-            print(f"Réponse trouvée dans le cache pour la requête : {user_query}")
             return self.cache_responses[user_query]
 
         rag_chain = self.create_rag_chain()
@@ -172,5 +134,4 @@ Réponse:
             self.cache_responses[user_query] = response_stream
             return response_stream
         except Exception as e:
-            print(f"Erreur lors de l'exécution de la requête : {e}")
             return [f"Erreur : {e}"]
