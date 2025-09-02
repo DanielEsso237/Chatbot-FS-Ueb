@@ -249,6 +249,6 @@ class OptimizedChatbotUI:
         st.markdown("""
         <div style='text-align: center; color: #6b7280; font-size: 0.85rem; padding: 1rem;'>
             <p>⚡ <strong>Chatbot FS-UEb Optimisé</strong> - Université d'Ebolowa, Faculté des Sciences</p>
-            <p>🚀 Version haute performance pour i5 4ème gen | Esso Daniel - OPENMIND ACADEMY</p>
+            <p>🚀Esso Daniel - OPENMIND ACADEMY</p>
         </div>
         """, unsafe_allow_html=True)
