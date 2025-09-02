@@ -21,7 +21,7 @@ class AdminLogic:
         result = []
         for f in files:
             path = os.path.join(PDF_FOLDER, f)
-            size = os.path.getsize(path) / 1024  # Ko
+            size = os.path.getsize(path) / 1024  
             mod_time = datetime.fromtimestamp(os.path.getmtime(path))
             result.append({
                 "name": f,
@@ -53,6 +53,4 @@ class AdminLogic:
 
     def reindex(self):
         """⚡ Stub pour reindexer la base (à connecter avec chatbot_logic)."""
-        # Exemple : from backend.chatbot_logic import load_index
-        # load_index()
         return "Réindexation effectuée avec succès ✅"
