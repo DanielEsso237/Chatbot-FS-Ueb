@@ -15,8 +15,6 @@ def load_custom_css():
 class OptimizedChatbotUI:
     def __init__(self, pdf_folder):
         self.chatbot_logic = OptimizedChatbotLogic(pdf_folder)
-        
-        # Précharger le modèle au démarrage
         if "model_preloaded" not in st.session_state:
             with st.spinner("🔧 Initialisation du modèle..."):
                 self.chatbot_logic.preload_model()
@@ -56,34 +54,30 @@ class OptimizedChatbotUI:
             
             st.markdown("---")
             
-            # Indicateur de performance
             st.markdown("### 🚀 Optimisations Actives")
             optimizations = [
                 "✅ Cache intelligent des réponses",
                 "✅ Modèle préchargé",
-                "✅ Index FAISS persistant",
                 "✅ Streaming fluide",
                 "✅ Interface réactive",
-                "✅ Paramètres CPU optimisés"
             ]
             for opt in optimizations:
                 st.markdown(f"<small>{opt}</small>", unsafe_allow_html=True)
             
             st.markdown("---")
             st.markdown("### ℹ️ Informations")
-            st.info("Version optimisée pour votre configuration i5 4ème gen + 8GB RAM")
+            st.info("Ce chatbot est optimisé pour répondre rapidement aux questions basées sur les documents de la Faculté des Sciences. Posez vos questions en toute simplicité !")
             
             st.markdown("---")
             st.markdown("### 🔧 Fonctionnalités")
             st.markdown("""
             - 🔍 Recherche vectorielle rapide
-            - 🤖 Gemma 2B optimisé CPU
+            - 🤖 Réponse basée sur les documents contenant les informations sur la faculté
             - 📚 Cache intelligent
             - ⚡ Réponses en temps réel
             - 🎯 Interface moderne
             """)
             
-            # Bouton pour vider le cache
             if st.button("🗑️ Vider le cache"):
                 self.chatbot_logic.cache_responses.clear()
                 if hasattr(st.session_state, 'messages'):
@@ -92,7 +86,6 @@ class OptimizedChatbotUI:
                 st.rerun()
 
     def render_performance_metrics(self):
-        """Afficher des métriques de performance"""
         col1, col2, col3 = st.columns(3)
         
         with col1:
@@ -119,7 +112,6 @@ class OptimizedChatbotUI:
             )
 
     def render_quick_questions(self):
-        """Afficher des questions rapides prédéfinies"""
         st.markdown("### 💬 Questions rapides")
         
         quick_questions = [
@@ -133,42 +125,35 @@ class OptimizedChatbotUI:
         for i, question in enumerate(quick_questions):
             with cols[i % 2]:
                 if st.button(f"❓ {question}", key=f"quick_{i}"):
-                    # Ajouter la question à l'historique et relancer
                     st.session_state.messages.append({"role": "user", "content": question})
                     st.session_state.pending_query = question
                     st.rerun()
 
     def render_typing_animation(self, text, placeholder):
-        """Animation de frappe fluide"""
         displayed_text = ""
         for char in text:
             displayed_text += char
             placeholder.markdown(f"**{displayed_text}**")
-            time.sleep(0.02)  # Vitesse d'animation
+            time.sleep(0.02)
 
     def process_query_streaming(self, user_query, status_placeholder, response_placeholder):
-        """Traitement avec streaming fluide"""
         full_response = ""
         current_status = ""
         
         try:
-            # Traiter la requête avec statuts
             for msg_type, content in self.chatbot_logic.run_query_with_status(user_query):
                 if msg_type == "status":
                     current_status = content
                     status_placeholder.markdown(f"**{current_status}**")
                     
                 elif msg_type == "content":
-                    # Effacer le statut une fois qu'on commence à recevoir du contenu
                     if current_status:
                         status_placeholder.empty()
                         current_status = ""
                     
                     full_response += content
-                    # Affichage avec curseur clignotant
                     response_placeholder.markdown(full_response + "▌")
             
-            # Affichage final sans curseur
             status_placeholder.empty()
             response_placeholder.markdown(full_response)
             
@@ -191,21 +176,17 @@ class OptimizedChatbotUI:
         self.render_header()
         self.render_sidebar()
         
-        # Préparation des données avec indicateur de progression
         with st.spinner("📚 Chargement des documents..."):
             self.chatbot_logic.prepare_data(st.session_state)
         
         with st.spinner("🔍 Initialisation de l'index..."):
             self.chatbot_logic.load_index(st.session_state)
         
-        # Métriques de performance
         self.render_performance_metrics()
         st.markdown("---")
         
-        # Interface de chat optimisée
         st.markdown('<div class="fade-in">', unsafe_allow_html=True)
         
-        # Initialiser les messages
         if "messages" not in st.session_state:
             st.session_state.messages = []
             welcome_msg = """
@@ -221,57 +202,45 @@ class OptimizedChatbotUI:
             """
             st.session_state.messages.append({"role": "assistant", "content": welcome_msg})
 
-        # Limiter l'historique pour économiser la mémoire
         st.session_state.messages = st.session_state.messages[-15:]
 
-        # Afficher l'historique des messages
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-        # Questions rapides si pas de conversation
         if len(st.session_state.messages) <= 1:
             self.render_quick_questions()
             st.markdown("---")
 
-        # Gérer les requêtes en attente (depuis les questions rapides)
         if hasattr(st.session_state, 'pending_query'):
             user_query = st.session_state.pending_query
             delattr(st.session_state, 'pending_query')
             
-            # Afficher la question utilisateur
             with st.chat_message("user"):
                 st.markdown(user_query)
             
-            # Traitement de la réponse
             with st.chat_message("assistant"):
                 status_placeholder = st.empty()
                 response_placeholder = st.empty()
                 
-                # Traitement avec streaming
                 response = self.process_query_streaming(user_query, status_placeholder, response_placeholder)
                 st.session_state.messages.append({"role": "assistant", "content": response})
 
-        # Zone de saisie
         if user_query := st.chat_input("💬 Votre question (tapez puis Entrée)..."):
-            # Afficher immédiatement la question de l'utilisateur
             with st.chat_message("user"):
                 st.markdown(user_query)
             st.session_state.messages.append({"role": "user", "content": user_query})
 
-            # Réponse de l'assistant avec streaming fluide
             with st.chat_message("assistant"):
                 status_placeholder = st.empty()
                 response_placeholder = st.empty()
                 
-                # Traitement avec streaming
                 response = self.process_query_streaming(user_query, status_placeholder, response_placeholder)
                 st.session_state.messages.append({"role": "assistant", "content": response})
         
         st.markdown('</div>', unsafe_allow_html=True)
         st.markdown("---")
         
-        # Footer optimisé
         st.markdown("""
         <div style='text-align: center; color: #6b7280; font-size: 0.85rem; padding: 1rem;'>
             <p>⚡ <strong>Chatbot FS-UEb Optimisé</strong> - Université d'Ebolowa, Faculté des Sciences</p>

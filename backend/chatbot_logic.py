@@ -16,15 +16,11 @@ class OptimizedChatbotLogic:
     def __init__(self, pdf_folder, index_file="faiss_index"):
         self.pdf_folder = pdf_folder
         self.index_file = index_file
-        
-        # Configuration Ollama optimisée pour votre configuration
         self.model_path = r"C:\Users\T.SHIGARAKI\.cache\huggingface\hub\models--sentence-transformers--all-MiniLM-L12-v2\snapshots\c004d8e3e901237d8fa7e9fff12774962e391ce5"
         self.embeddings = HuggingFaceEmbeddings(
             model_name=self.model_path,
             encode_kwargs={'normalize_embeddings': True}
         )
-        
-        # Configuration Ollama optimisée
         self.llm = OllamaLLM(
             model="gemma:2b", 
             base_url="http://127.0.0.1:11434",
@@ -36,12 +32,9 @@ class OptimizedChatbotLogic:
             top_k=10,
             top_p=0.9
         )
-
         self.retriever = None
         self.cache_responses = {}
         self.executor = ThreadPoolExecutor(max_workers=2)
-
-        # Prompt optimisé
         self.system_prompt = """
 Tu es un assistant spécialisé. Réponds uniquement avec le contexte fourni.
 
@@ -57,7 +50,6 @@ Réponse:
 """
 
     def prepare_data(self, st_session_state):
-        """Préparation des données optimisée avec cache intelligent"""
         texts_file = os.path.join(self.pdf_folder, "texts.pkl")
         files_list_file = os.path.join(self.pdf_folder, "files_list.pkl")
         
@@ -71,7 +63,6 @@ Réponse:
             st_session_state.texts = []
             return
 
-        # Cache intelligent
         if os.path.exists(texts_file) and os.path.exists(files_list_file):
             try:
                 with open(files_list_file, "rb") as f:
@@ -94,7 +85,6 @@ Réponse:
             except:
                 pass
 
-        # Chargement des documents
         documents = []
         for file in current_files:
             try:
@@ -112,7 +102,6 @@ Réponse:
             st_session_state.texts = []
             return
 
-        # Chunking
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=750,
             chunk_overlap=150,
@@ -121,7 +110,6 @@ Réponse:
         )
         st_session_state.texts = text_splitter.split_documents(documents)
 
-        # Sauvegarde du cache
         try:
             with open(texts_file, "wb") as f:
                 pickle.dump(st_session_state.texts, f)
@@ -138,7 +126,6 @@ Réponse:
             print(f"Erreur de cache: {e}")
 
     def load_index(self, st_session_state):
-        """Chargement d'index optimisé"""
         if "retriever" in st_session_state and st_session_state.retriever:
             self.retriever = st_session_state.retriever
             return
@@ -178,7 +165,6 @@ Réponse:
             st_session_state.retriever = None
 
     def create_rag_chain(self):
-        """Création de chaîne RAG"""
         if not self.retriever:
             return None
             
@@ -196,7 +182,6 @@ Réponse:
         return chain
     
     def _format_docs(self, docs):
-        """Formater les documents"""
         max_context_length = 1500
         
         formatted = []
@@ -216,10 +201,8 @@ Réponse:
         return "\n\n".join(formatted)
 
     def run_query_with_status(self, user_query):
-        """Version avec statuts pour UI fluide"""
-        # Étape 1: Vérifier le cache
         yield "status", "🔍 Recherche dans le cache..."
-        time.sleep(0.1)  # Petit délai pour l'affichage
+        time.sleep(0.1)
         
         if user_query in self.cache_responses:
             yield "status", "✅ Réponse trouvée en cache !"
@@ -230,17 +213,15 @@ Réponse:
             if isinstance(cached, list):
                 for chunk in cached:
                     yield "content", chunk
-                    time.sleep(0.05)  # Délai entre les chunks pour simulation streaming
+                    time.sleep(0.05)
             else:
-                # Si c'est une string, on la divise en mots
                 words = cached.split()
                 for i, word in enumerate(words):
                     yield "content", word + " "
-                    if i % 3 == 0:  # Pause tous les 3 mots
+                    if i % 3 == 0:
                         time.sleep(0.05)
             return
 
-        # Étape 2: Créer la chaîne RAG
         yield "status", "🔧 Initialisation du système de recherche..."
         time.sleep(0.1)
         
@@ -250,17 +231,14 @@ Réponse:
             return
 
         try:
-            # Étape 3: Recherche dans les documents
             yield "status", "📚 Recherche dans les documents..."
             time.sleep(0.2)
             
-            # Étape 4: Génération de la réponse
             yield "status", "🤖 Génération de la réponse par Gemma..."
             time.sleep(0.1)
             
             yield "status", "💬 Affichage en temps réel..."
             
-            # Stream de la réponse
             response_stream = rag_chain.stream(user_query)
             response_chunks = []
             
@@ -269,11 +247,9 @@ Réponse:
                     response_chunks.append(chunk)
                     yield "content", chunk
             
-            # Mettre en cache
             if response_chunks:
                 self.cache_responses[user_query] = response_chunks
                 
-                # Limiter la taille du cache
                 if len(self.cache_responses) > 50:
                     oldest_keys = list(self.cache_responses.keys())[:10]
                     for key in oldest_keys:
@@ -286,13 +262,11 @@ Réponse:
             yield "content", error_msg
 
     def run_query(self, user_query):
-        """Version simple pour compatibilité"""
         for msg_type, content in self.run_query_with_status(user_query):
             if msg_type == "content":
                 yield content
 
     def preload_model(self):
-        """Précharger le modèle"""
         try:
             dummy_query = "test"
             list(self.llm.stream(dummy_query))
