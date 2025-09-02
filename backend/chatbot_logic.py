@@ -1,6 +1,7 @@
 import os
 import pickle
 import asyncio
+import time
 from concurrent.futures import ThreadPoolExecutor
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
@@ -15,33 +16,25 @@ class OptimizedChatbotLogic:
     def __init__(self, pdf_folder, index_file="faiss_index"):
         self.pdf_folder = pdf_folder
         self.index_file = index_file
-        
-        # Configuration Ollama optimisée pour votre configuration
         self.model_path = r"C:\Users\T.SHIGARAKI\.cache\huggingface\hub\models--sentence-transformers--all-MiniLM-L12-v2\snapshots\c004d8e3e901237d8fa7e9fff12774962e391ce5"
         self.embeddings = HuggingFaceEmbeddings(
             model_name=self.model_path,
-            encode_kwargs={'normalize_embeddings': True}  # Normalisation pour une recherche plus rapide
+            encode_kwargs={'normalize_embeddings': True}
         )
-        
-        # Configuration Ollama optimisée
         self.llm = OllamaLLM(
             model="gemma:2b", 
             base_url="http://127.0.0.1:11434",
-            # Paramètres d'optimisation pour votre config
-            temperature=0.1,  # Réduire pour des réponses plus déterministes et rapides
-            num_ctx=1024,     # Contexte réduit pour votre RAM limitée (8GB)
-            num_thread=4,     # Utiliser tous les cœurs de votre i5
-            num_gpu=0,        # Désactiver GPU (GT720M trop faible)
+            temperature=0.1,
+            num_ctx=1024,
+            num_thread=4,
+            num_gpu=0,
             repeat_penalty=1.1,
-            top_k=10,         # Réduire pour accélérer la génération
+            top_k=10,
             top_p=0.9
         )
-
         self.retriever = None
         self.cache_responses = {}
-        self.executor = ThreadPoolExecutor(max_workers=2)  # Pour les opérations asynchrones
-
-        # Prompt optimisé (plus court et direct)
+        self.executor = ThreadPoolExecutor(max_workers=2)
         self.system_prompt = """
 Tu es un assistant spécialisé. Réponds uniquement avec le contexte fourni.
 
@@ -57,7 +50,6 @@ Réponse:
 """
 
     def prepare_data(self, st_session_state):
-        """Préparation des données optimisée avec cache intelligent"""
         texts_file = os.path.join(self.pdf_folder, "texts.pkl")
         files_list_file = os.path.join(self.pdf_folder, "files_list.pkl")
         
@@ -71,13 +63,11 @@ Réponse:
             st_session_state.texts = []
             return
 
-        # Cache intelligent - vérifier si les fichiers ont changé
         if os.path.exists(texts_file) and os.path.exists(files_list_file):
             try:
                 with open(files_list_file, "rb") as f:
                     old_files = pickle.load(f)
                 
-                # Vérifier aussi les dates de modification
                 files_modified = {}
                 for file in current_files:
                     files_modified[file] = os.path.getmtime(os.path.join(self.pdf_folder, file))
@@ -95,16 +85,13 @@ Réponse:
             except:
                 pass
 
-        # Chargement optimisé des documents
         documents = []
         for file in current_files:
             try:
                 loader = PyPDFLoader(os.path.join(self.pdf_folder, file))
                 docs = loader.load()
                 
-                # Prétraitement léger pour optimiser
                 for doc in docs:
-                    # Nettoyer le texte pour réduire la taille
                     doc.page_content = " ".join(doc.page_content.split())
                     
                 documents.extend(docs)
@@ -115,23 +102,20 @@ Réponse:
             st_session_state.texts = []
             return
 
-        # Chunking optimisé - conserver la longueur mais optimiser le processus
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=750,
             chunk_overlap=150,
             length_function=len,
-            separators=["\n\n", "\n", ". ", " ", ""]  # Séparateurs optimisés
+            separators=["\n\n", "\n", ". ", " ", ""]
         )
         st_session_state.texts = text_splitter.split_documents(documents)
 
-        # Sauvegarde du cache
         try:
             with open(texts_file, "wb") as f:
                 pickle.dump(st_session_state.texts, f)
             with open(files_list_file, "wb") as f:
                 pickle.dump(current_files, f)
             
-            # Sauvegarder les dates de modification
             files_modified = {}
             for file in current_files:
                 files_modified[file] = os.path.getmtime(os.path.join(self.pdf_folder, file))
@@ -142,7 +126,6 @@ Réponse:
             print(f"Erreur de cache: {e}")
 
     def load_index(self, st_session_state):
-        """Chargement d'index optimisé avec persistence"""
         if "retriever" in st_session_state and st_session_state.retriever:
             self.retriever = st_session_state.retriever
             return
@@ -152,7 +135,6 @@ Réponse:
             st_session_state.retriever = None
             return
 
-        # Essayer de charger l'index existant d'abord
         try:
             if os.path.exists(f"{self.index_file}.faiss"):
                 db = FAISS.load_local(
@@ -162,20 +144,19 @@ Réponse:
                 )
                 self.retriever = db.as_retriever(
                     search_type="similarity",
-                    search_kwargs={"k": 3}  # Réduire le nombre de chunks récupérés
+                    search_kwargs={"k": 3}
                 )
                 st_session_state.retriever = self.retriever
                 return
         except:
             pass
 
-        # Créer un nouvel index si nécessaire
         try:
             db = FAISS.from_documents(st_session_state.texts, self.embeddings)
             db.save_local(self.index_file)
             self.retriever = db.as_retriever(
                 search_type="similarity",
-                search_kwargs={"k": 3}  # Limiter à 3 chunks max
+                search_kwargs={"k": 3}
             )
             st_session_state.retriever = self.retriever
         except Exception as e:
@@ -184,13 +165,11 @@ Réponse:
             st_session_state.retriever = None
 
     def create_rag_chain(self):
-        """Création de chaîne RAG optimisée"""
         if not self.retriever:
             return None
             
         prompt = ChatPromptTemplate.from_template(self.system_prompt)
         
-        # Chaîne optimisée avec limitation du contexte
         chain = (
             {
                 "context": self.retriever | self._format_docs, 
@@ -203,9 +182,7 @@ Réponse:
         return chain
     
     def _format_docs(self, docs):
-        """Formater les documents pour limiter la longueur du contexte"""
-        # Limiter le nombre de caractères totaux du contexte
-        max_context_length = 1500  # Adapté à votre config RAM
+        max_context_length = 1500
         
         formatted = []
         total_length = 0
@@ -216,93 +193,81 @@ Réponse:
                 formatted.append(content)
                 total_length += len(content)
             else:
-                # Tronquer le dernier document si nécessaire
                 remaining = max_context_length - total_length
-                if remaining > 100:  # Minimum viable
+                if remaining > 100:
                     formatted.append(content[:remaining] + "...")
                 break
         
         return "\n\n".join(formatted)
 
-    async def run_query_async(self, user_query):
-        """Requête asynchrone pour améliorer la réactivité"""
+    def run_query_with_status(self, user_query):
+        yield "status", "🔍 Recherche dans le cache..."
+        time.sleep(0.1)
+        
         if user_query in self.cache_responses:
-            # Retourner le cache sous forme de générateur
-            cached = self.cache_responses[user_query]
-            if isinstance(cached, str):
-                for chunk in cached.split():
-                    yield chunk + " "
-            else:
-                for chunk in cached:
-                    yield chunk
-            return
-
-        rag_chain = self.create_rag_chain()
-        if not rag_chain:
-            yield "Aucun document disponible pour répondre à la requête."
-            return
-
-        try:
-            # Exécuter la requête dans un thread séparé
-            loop = asyncio.get_event_loop()
-            response_stream = await loop.run_in_executor(
-                self.executor, 
-                lambda: list(rag_chain.stream(user_query))
-            )
+            yield "status", "✅ Réponse trouvée en cache !"
+            time.sleep(0.2)
+            yield "status", "💬 Affichage de la réponse..."
             
-            # Mettre en cache et streamer
-            full_response = "".join(response_stream)
-            self.cache_responses[user_query] = response_stream
-            
-            for chunk in response_stream:
-                yield chunk
-                
-        except Exception as e:
-            error_msg = f"Erreur : {e}"
-            yield error_msg
-
-    def run_query(self, user_query):
-        """Version synchrone optimisée"""
-        if user_query in self.cache_responses:
             cached = self.cache_responses[user_query]
             if isinstance(cached, list):
                 for chunk in cached:
-                    yield chunk
+                    yield "content", chunk
+                    time.sleep(0.05)
             else:
-                yield cached
+                words = cached.split()
+                for i, word in enumerate(words):
+                    yield "content", word + " "
+                    if i % 3 == 0:
+                        time.sleep(0.05)
             return
 
+        yield "status", "🔧 Initialisation du système de recherche..."
+        time.sleep(0.1)
+        
         rag_chain = self.create_rag_chain()
         if not rag_chain:
-            yield "Aucun document disponible pour répondre à la requête."
+            yield "content", "❌ Aucun document disponible pour répondre à la requête."
             return
 
         try:
+            yield "status", "📚 Recherche dans les documents..."
+            time.sleep(0.2)
+            
+            yield "status", "🤖 Génération de la réponse par Gemma..."
+            time.sleep(0.1)
+            
+            yield "status", "💬 Affichage en temps réel..."
+            
             response_stream = rag_chain.stream(user_query)
             response_chunks = []
             
             for chunk in response_stream:
-                response_chunks.append(chunk)
-                yield chunk
+                if chunk and chunk.strip():
+                    response_chunks.append(chunk)
+                    yield "content", chunk
             
-            # Mettre en cache la réponse complète
-            self.cache_responses[user_query] = response_chunks
-            
-            # Limiter la taille du cache (mémoire limitée)
-            if len(self.cache_responses) > 50:
-                # Supprimer les plus anciennes entrées
-                oldest_keys = list(self.cache_responses.keys())[:10]
-                for key in oldest_keys:
-                    del self.cache_responses[key]
-                    
+            if response_chunks:
+                self.cache_responses[user_query] = response_chunks
+                
+                if len(self.cache_responses) > 50:
+                    oldest_keys = list(self.cache_responses.keys())[:10]
+                    for key in oldest_keys:
+                        del self.cache_responses[key]
+                        
         except Exception as e:
-            error_msg = f"Erreur : {e}"
-            yield error_msg
+            yield "status", "❌ Erreur lors du traitement..."
+            time.sleep(0.1)
+            error_msg = f"Une erreur est survenue: {str(e)}"
+            yield "content", error_msg
+
+    def run_query(self, user_query):
+        for msg_type, content in self.run_query_with_status(user_query):
+            if msg_type == "content":
+                yield content
 
     def preload_model(self):
-        """Précharger le modèle pour des réponses plus rapides"""
         try:
-            # Faire une requête simple pour "chauffer" le modèle
             dummy_query = "test"
             list(self.llm.stream(dummy_query))
         except:
