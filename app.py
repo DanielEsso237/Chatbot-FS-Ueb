@@ -1,7 +1,7 @@
 import streamlit as st
 from views.login import LoginPage
 from views.register import RegisterPage
-from views.chatbot import ChatbotUI
+from views.chatbot import OptimizedChatbotUI
 from views.admin import AdminPage
 from dotenv import load_dotenv
 from utils.cookies import set_cookie, get_cookie
@@ -94,7 +94,7 @@ def main():
                 admin_ui = AdminPage()
                 admin_ui.render()
             else:
-                app_ui = ChatbotUI(pdf_folder="pdfs")
+                app_ui = OptimizedChatbotUI(pdf_folder="pdfs")
                 app_ui.render()
 
             if st.sidebar.button("🚪 Déconnexion", key="logout_button"):
